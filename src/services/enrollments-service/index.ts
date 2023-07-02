@@ -4,19 +4,30 @@ import { invalidDataError, notFoundError } from '@/errors';
 import addressRepository, { CreateAddressParams } from '@/repositories/address-repository';
 import enrollmentRepository, { CreateEnrollmentParams } from '@/repositories/enrollment-repository';
 import { exclude } from '@/utils/prisma-utils';
+import { ViaCEPAddress } from '@/protocols';
 
 // TODO - Receber o CEP por parâmetro nesta função.
-async function getAddressFromCEP() {
-
+type ViaCEPAddressResponse = Omit<ViaCEPAddress, 'localidade'> & { cidade: string };
+async function getAddressFromCEP(cep: string): Promise<ViaCEPAddressResponse> {
   // FIXME: está com CEP fixo!
-  const result = await request.get(`${process.env.VIA_CEP_API}/37440000/json/`);
+  const result = await request.get(`${process.env.VIA_CEP_API}/${cep}/json/`);
 
-  if (!result.data) {
+  const invalidCEP = !result.data;
+  const notFoundCEP: boolean = (result.data as { erro: boolean })?.erro;
+
+  if (notFoundCEP || invalidCEP) {
     throw notFoundError();
   }
 
-  // FIXME: não estamos interessados em todos os campos
-  return result.data;
+  const address = {
+    logradouro: result.data.logradouro,
+    complemento: result.data.complemento,
+    bairro: result.data.bairro,
+    cidade: result.data.localidade,
+    uf: result.data.uf,
+  };
+
+  return address;
 }
 
 async function getOneWithAddressByUserId(userId: number): Promise<GetOneWithAddressByUserIdResult> {
@@ -48,6 +59,15 @@ async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollm
   const address = getAddressForUpsert(params.address);
 
   // TODO - Verificar se o CEP é válido antes de associar ao enrollment.
+
+  const result = await request.get(`${process.env.VIA_CEP_API}/${address.cep}/json/`);
+
+  const invalidCEP = !result.data;
+  const notFoundCEP: boolean = (result.data as { erro: boolean })?.erro;
+
+  if (notFoundCEP || invalidCEP) {
+    throw notFoundError();
+  }
 
   const newEnrollment = await enrollmentRepository.upsert(params.userId, enrollment, exclude(enrollment, 'userId'));
 
