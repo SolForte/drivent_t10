@@ -6,10 +6,7 @@ import { conflictError, notFoundError } from '@/errors';
 async function getTicketTypes(): Promise<TicketType[]> {
   const ticketTypes = await ticketsRepository.findTicketTypes();
   if (!ticketTypes) {
-    throw {
-      name: 'NotFoundError',
-      message: 'Ticket not found!',
-    };
+    throw notFoundError();
   }
   return ticketTypes;
 }
@@ -28,7 +25,7 @@ async function createTicket(userId: number, ticketTypeId: number): Promise<Ticke
   const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
   if (ticket) throw conflictError('User already has a ticket!');
 
-  return await ticketsRepository.createTicket(enrollment.id, ticketTypeId);
+  return ticketsRepository.createTicket(enrollment.id, ticketTypeId);
 }
 
 export default {
