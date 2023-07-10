@@ -1,6 +1,7 @@
 import { prisma } from '@/config';
 
 const INITIAL_TICKET_STATUS = 'RESERVED';
+const FINAL_TICKET_STATUS = 'PAID';
 
 //GET /tickets/type
 async function findTicketsType() {
@@ -33,6 +34,21 @@ async function createTicket(ticketTypeId: number, enrollmentId: number) {
   });
 }
 
-const ticketsRepository = { findTicketsType, findTicketId, createTicket };
+async function findTicketByType(id: number) {
+  return await prisma.ticketType.findUnique({
+    where: {
+      id,
+    },
+  });
+}
+
+async function updateTicketStatus(ticketId: number) {
+  return prisma.ticket.update({
+    where: { id: ticketId },
+    data: { status: FINAL_TICKET_STATUS },
+  });
+}
+
+const ticketsRepository = { findTicketsType, findTicketId, createTicket, findTicketByType, updateTicketStatus };
 
 export default ticketsRepository;
