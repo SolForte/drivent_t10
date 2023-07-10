@@ -9,18 +9,13 @@ async function findTicketsType() {
 }
 
 //GET /tickets
-async function findTicketId(userId: number) {
-  const ticket = await prisma.ticket.findFirst({
-    where: {
-      Enrollment: {
-        userId: userId,
-      },
-    },
+async function findTicketId(enrollmentId: number) {
+  return await prisma.ticket.findFirst({
+    where: { enrollmentId },
     include: {
       TicketType: true,
     },
   });
-  return ticket;
 }
 
 //POST /tickets
