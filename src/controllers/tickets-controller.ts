@@ -3,9 +3,9 @@ import httpStatus from 'http-status';
 import ticketService from '@/services/tickets-service';
 import { AuthenticatedRequest } from '@/middlewares';
 
-export async function getTicketsType(_req: AuthenticatedRequest, res: Response) {
+export async function getTicketsType(_req: AuthenticatedRequest, res: Response): Promise<Response> {
   try {
-    const types = await ticketService.getTypes();
+    const types = await ticketService.getTicketTypes();
 
     return res.status(httpStatus.OK).send(types);
   } catch (error) {
@@ -13,7 +13,7 @@ export async function getTicketsType(_req: AuthenticatedRequest, res: Response) 
   }
 }
 
-export async function getTickets(req: AuthenticatedRequest, res: Response) {
+export async function getTickets(req: AuthenticatedRequest, res: Response): Promise<Response> {
   const userId = Number(req);
 
   if (!userId) {
@@ -23,9 +23,13 @@ export async function getTickets(req: AuthenticatedRequest, res: Response) {
   try {
     const tickets = await ticketService.getTicket(userId);
 
+    if (!tickets) {
+      return res.sendStatus(httpStatus.NOT_FOUND);
+    }
+
     return res.status(httpStatus.OK).send(tickets);
   } catch (error) {
-    if (error.name == 'NotFoundError') {
+    if (error.name === 'NotFoundError') {
       return res.sendStatus(httpStatus.NOT_FOUND);
     } else {
       return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
@@ -33,7 +37,7 @@ export async function getTickets(req: AuthenticatedRequest, res: Response) {
   }
 }
 
-export async function postTickets(req: AuthenticatedRequest, res: Response) {
+export async function postTickets(req: AuthenticatedRequest, res: Response): Promise<Response> {
   const { ticketTypeId } = req.body as { ticketTypeId: number };
   const userId = Number(req);
 
@@ -45,10 +49,10 @@ export async function postTickets(req: AuthenticatedRequest, res: Response) {
     const create = await ticketService.createTicket(ticketTypeId, userId);
     return res.status(httpStatus.CREATED).send(create);
   } catch (error) {
-    if (error.name == 'NotFoundError') {
+    if (error.name === 'NotFoundError') {
       return res.sendStatus(httpStatus.NOT_FOUND);
     }
-    if (error.name == 'RequestError') {
+    if (error.name === 'BadRequestError') {
       return res.sendStatus(httpStatus.BAD_REQUEST);
     }
     return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);

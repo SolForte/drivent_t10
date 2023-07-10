@@ -1,16 +1,19 @@
+import { Ticket, TicketStatus, TicketType } from '@prisma/client';
+import { CreateTicket } from '@/protocols';
 import { prisma } from '@/config';
 
-const INITIAL_TICKET_STATUS = 'RESERVED';
-const FINAL_TICKET_STATUS = 'PAID';
-
 //GET /tickets/type
-async function findTicketsType() {
+async function findTicketsType(): Promise<TicketType[]> {
   return prisma.ticketType.findMany();
 }
 
 //GET /tickets
-async function findTicketId(enrollmentId: number) {
-  return await prisma.ticket.findFirst({
+async function findTicketId(enrollmentId: number): Promise<
+  Ticket & {
+    TicketType: TicketType;
+  }
+> {
+  return prisma.ticket.findFirst({
     where: { enrollmentId },
     include: {
       TicketType: true,
@@ -19,13 +22,9 @@ async function findTicketId(enrollmentId: number) {
 }
 
 //POST /tickets
-async function createTicket(ticketTypeId: number, enrollmentId: number) {
+async function createTicket(ticket: CreateTicket) {
   return prisma.ticket.create({
-    data: {
-      ticketTypeId: ticketTypeId,
-      status: INITIAL_TICKET_STATUS,
-      enrollmentId: enrollmentId,
-    },
+    data: ticket,
   });
 }
 
@@ -39,8 +38,12 @@ async function findTicketByType(id: number) {
 
 async function updateTicketStatus(ticketId: number) {
   return prisma.ticket.update({
-    where: { id: ticketId },
-    data: { status: FINAL_TICKET_STATUS },
+    where: {
+      id: ticketId,
+    },
+    data: {
+      status: TicketStatus.PAID,
+    },
   });
 }
 
