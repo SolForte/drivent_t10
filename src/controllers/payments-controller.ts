@@ -1,38 +1,38 @@
-import httpStatus from 'http-status';
 import { Response } from 'express';
-import { AuthenticatedRequest } from '@/middlewares';
-import { PaymentBody } from '@/protocols';
+import httpStatus from 'http-status';
 import paymentsService from '@/services/payments-service';
+import { invalidQueryError } from '@/errors';
+import { AuthenticatedRequest } from '@/middlewares';
 
-export async function getTicketStatus(req: AuthenticatedRequest, res: Response) {
-  const userId = Number(req);
-  const ticketId = Number(req.query.ticketId);
+async function newPayment(req: AuthenticatedRequest, res: Response): Promise<Response> {
+  const { userId } = req;
+  const { ticketId, cardData } = req.body;
+  const { issuer: cardIssuer } = cardData;
+  const cardLastDigits = cardData.number.slice(-4);
+  const payment = await paymentsService.newPayment(userId, { ticketId, cardIssuer, cardLastDigits });
+  return res.status(httpStatus.OK).send(payment);
+}
+
+async function getPayment(req: AuthenticatedRequest, res: Response): Promise<Response> {
+  const { userId } = req;
+  const { ticketId }: { ticketId?: string } = req.query;
 
   if (!ticketId) {
     return res.sendStatus(httpStatus.BAD_REQUEST);
   }
 
-  try {
-    const ticket = await paymentsService.getPayment(ticketId, userId);
+  const ticketIdQuery = parseInt(ticketId);
+  if (ticketIdQuery <= 0 || isNaN(ticketIdQuery)) throw invalidQueryError('Invalid ticket!');
 
-    return res.status(httpStatus.OK).send(ticket);
-  } catch (error) {
-    return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
+  const payment = await paymentsService.getPayment(userId, ticketIdQuery);
+  if (!payment) {
+    return res.sendStatus(httpStatus.NOT_FOUND);
   }
+
+  return res.status(httpStatus.OK).send(payment);
 }
 
-export async function createPayment(req: AuthenticatedRequest, res: Response) {
-  const body = req.body as PaymentBody;
-  const userId = Number(req);
-
-  if (!body.cardData || !body.ticketId) {
-    return res.sendStatus(httpStatus.BAD_REQUEST);
-  }
-
-  try {
-    const ticket = await paymentsService.createPayment(body, userId);
-    return res.status(httpStatus.OK).send(ticket);
-  } catch (error) {
-    return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
-  }
-}
+export default {
+  newPayment,
+  getPayment,
+};
