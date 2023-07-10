@@ -4,7 +4,7 @@ import paymentsService from '@/services/payments-service';
 import { invalidQueryError } from '@/errors';
 import { AuthenticatedRequest } from '@/middlewares';
 
-async function newPayment(req: AuthenticatedRequest, res: Response): Promise<Response> {
+export async function newPayment(req: AuthenticatedRequest, res: Response): Promise<Response> {
   const { userId } = req;
   const { ticketId, cardData } = req.body;
   const { issuer: cardIssuer } = cardData;
@@ -13,7 +13,7 @@ async function newPayment(req: AuthenticatedRequest, res: Response): Promise<Res
   return res.status(httpStatus.OK).send(payment);
 }
 
-async function getPayment(req: AuthenticatedRequest, res: Response): Promise<Response> {
+export async function getPayment(req: AuthenticatedRequest, res: Response): Promise<Response> {
   const { userId } = req;
   const { ticketId }: { ticketId?: string } = req.query;
 
@@ -31,8 +31,3 @@ async function getPayment(req: AuthenticatedRequest, res: Response): Promise<Res
 
   return res.status(httpStatus.OK).send(payment);
 }
-
-export default {
-  newPayment,
-  getPayment,
-};
