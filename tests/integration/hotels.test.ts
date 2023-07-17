@@ -36,7 +36,6 @@ describe('GET /hotels', () => {
       const user = await createUser();
       const token = await generateValidToken(user);
       const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
-      // ERROR HERE!!!
       expect(response.status).toEqual(httpStatus.NOT_FOUND);
     });
     it('should respond with status 404 if no registered ticket exists', async () => {
@@ -44,7 +43,6 @@ describe('GET /hotels', () => {
       const token = await generateValidToken(user);
       await createEnrollmentWithAddress(user);
       const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
-      // ERROR HERE!!!
       expect(response.status).toEqual(httpStatus.NOT_FOUND);
     });
 
@@ -116,7 +114,6 @@ describe(`GET /hotels/${FIRST_HOTEL_ID}`, () => {
     it('should respond with status 404 if user does not have an enrollment', async () => {
       const token = await generateValidToken();
       const response = await server.get(`/hotels/${FIRST_HOTEL_ID}`).set('Authorization', `Bearer ${token}`);
-      // ERROR HERE!!!
       expect(response.status).toEqual(httpStatus.NOT_FOUND);
     });
 
@@ -125,7 +122,6 @@ describe(`GET /hotels/${FIRST_HOTEL_ID}`, () => {
       const token = await generateValidToken(user);
       await createEnrollmentWithAddress(user);
       const response = await server.get(`/hotels/${FIRST_HOTEL_ID}`).set('Authorization', `Bearer ${token}`);
-      // ERROR HERE!!!
       expect(response.status).toEqual(httpStatus.NOT_FOUND);
     });
 
