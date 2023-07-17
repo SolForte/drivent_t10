@@ -1,5 +1,4 @@
 import enrollmentsService from '../enrollments-service';
-import { notFoundError } from '../../errors';
 import hotelsRepository from '@/repositories/hotels-repository';
 import ticketsRepository from '@/repositories/tickets-repository';
 import ticketService from '@/services/tickets-service';
@@ -7,11 +6,11 @@ import ticketService from '@/services/tickets-service';
 async function checkUserData(userId: number) {
   const enrollment = await enrollmentsService.getOneWithAddressByUserId(userId);
   if (!enrollment) {
-    throw notFoundError();
+    throw Error('NotFound');
   }
   const ticket = await ticketService.getTicketByUserId(userId);
   if (!ticket) {
-    throw notFoundError();
+    throw Error('NotFound');
   }
 
   if (ticket.status !== 'PAID') {
@@ -28,7 +27,7 @@ async function getHotels(userId: number) {
   await checkUserData(userId);
   const hotels = await hotelsRepository.findMany();
   if (!hotels || hotels.length === 0) {
-    throw notFoundError();
+    throw Error('NotFound');
   }
   return hotels;
 }
@@ -42,7 +41,7 @@ async function getHotelById(hotelId: number, userId: number) {
 
   const hotels = await hotelsRepository.findUnique(hotelId);
   if (!hotels) {
-    throw notFoundError();
+    throw Error('NotFound');
   }
 
   return hotels;

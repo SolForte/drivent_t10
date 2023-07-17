@@ -13,8 +13,10 @@ export async function getHotelsList(req: AuthenticatedRequest, res: Response) {
       return res.sendStatus(httpStatus.NOT_FOUND);
     } else if (error.message === 'PaymentRequired') {
       return res.sendStatus(httpStatus.PAYMENT_REQUIRED);
-    } else {
+    } else if (error.message === 'BadRequest') {
       res.sendStatus(httpStatus.BAD_REQUEST);
+    } else {
+      res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
@@ -30,8 +32,10 @@ export async function getHotelById(req: AuthenticatedRequest, res: Response) {
       return res.sendStatus(httpStatus.NOT_FOUND);
     } else if (error.message === 'PaymentRequired') {
       return res.sendStatus(httpStatus.PAYMENT_REQUIRED);
-    } else {
+    } else if (error.message === 'BadRequest') {
       return res.sendStatus(httpStatus.BAD_REQUEST);
+    } else {
+      res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
