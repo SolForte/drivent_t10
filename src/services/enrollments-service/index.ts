@@ -29,7 +29,9 @@ async function getAddressFromCEP(cep: string): Promise<AddressEnrollment> {
 async function getOneWithAddressByUserId(userId: number): Promise<GetOneWithAddressByUserIdResult> {
   const enrollmentWithAddress = await enrollmentRepository.findWithAddressByUserId(userId);
 
-  if (!enrollmentWithAddress) throw notFoundError();
+  if (!enrollmentWithAddress) {
+    throw Error('NotFound');
+  }
 
   const [firstAddress] = enrollmentWithAddress.Address;
   const address = getFirstAddress(firstAddress);
@@ -55,15 +57,6 @@ async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollm
   const address = getAddressForUpsert(params.address);
 
   await getAddressFromCEP(address.cep);
-
-  const result = await request.get(`${process.env.VIA_CEP_API}/${address.cep}/json/`);
-
-  const invalidCEP = !result.data;
-  const notFoundCEP: boolean = (result.data as { erro: boolean })?.erro;
-
-  if (notFoundCEP || invalidCEP) {
-    throw notFoundError();
-  }
 
   const newEnrollment = await enrollmentRepository.upsert(params.userId, enrollment, exclude(enrollment, 'userId'));
 
