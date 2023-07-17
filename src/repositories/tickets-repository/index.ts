@@ -1,45 +1,64 @@
-import { Ticket, TicketStatus, TicketType } from '@prisma/client';
+import { TicketStatus, TicketType } from '@prisma/client';
 import { prisma } from '@/config';
+import { CreateTicketParams } from '@/protocols';
 
 async function findTicketTypes(): Promise<TicketType[]> {
   return prisma.ticketType.findMany();
 }
 
-async function findTicketByEnrollmentId(enrollmentId: number): Promise<
-  Ticket & {
-    TicketType: TicketType;
-  }
-> {
+async function findTicketByEnrollmentId(enrollmentId: number) {
   return prisma.ticket.findFirst({
     where: { enrollmentId },
-    include: { TicketType: true },
+    include: {
+      TicketType: true,
+    },
   });
 }
 
-async function createTicket(enrollmentId: number, ticketTypeId: number) {
+async function createTicket(ticket: CreateTicketParams) {
   return prisma.ticket.create({
-    data: { enrollmentId, ticketTypeId, status: TicketStatus.RESERVED },
-    include: { TicketType: true },
-  });
-}
-async function findTicketById(ticketId: number) {
-  return prisma.ticket.findFirst({
-    where: { id: ticketId },
-    include: { TicketType: true },
+    data: ticket,
   });
 }
 
-async function updateTicketById(ticketId: number) {
+async function findTickeyById(ticketId: number) {
+  return prisma.ticket.findFirst({
+    where: {
+      id: ticketId,
+    },
+    include: {
+      Enrollment: true,
+    },
+  });
+}
+
+async function findTickeWithTypeById(ticketId: number) {
+  return prisma.ticket.findFirst({
+    where: {
+      id: ticketId,
+    },
+    include: {
+      TicketType: true,
+    },
+  });
+}
+
+async function ticketProcessPayment(ticketId: number) {
   return prisma.ticket.update({
-    where: { id: ticketId },
-    data: { status: TicketStatus.PAID },
+    where: {
+      id: ticketId,
+    },
+    data: {
+      status: TicketStatus.PAID,
+    },
   });
 }
 
 export default {
   findTicketTypes,
-  createTicket,
   findTicketByEnrollmentId,
-  findTicketById,
-  updateTicketById,
+  createTicket,
+  findTickeyById,
+  findTickeWithTypeById,
+  ticketProcessPayment,
 };
