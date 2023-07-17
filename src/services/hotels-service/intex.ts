@@ -1,3 +1,4 @@
+import { TicketStatus } from '@prisma/client';
 import enrollmentsService from '../enrollments-service';
 import hotelsRepository from '@/repositories/hotels-repository';
 import ticketsRepository from '@/repositories/tickets-repository';
@@ -13,7 +14,7 @@ async function checkUserData(userId: number) {
     throw Error('NotFound');
   }
 
-  if (ticket.status !== 'PAID') {
+  if (ticket.status !== TicketStatus.PAID) {
     throw Error('PaymentRequired');
   }
   const ticketsTypes = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
