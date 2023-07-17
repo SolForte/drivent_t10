@@ -16,7 +16,7 @@ export async function getHotelsList(req: AuthenticatedRequest, res: Response) {
     } else if (error.message === 'BadRequest') {
       res.sendStatus(httpStatus.BAD_REQUEST);
     } else {
-      res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
+      res.sendStatus(httpStatus.BAD_REQUEST);
     }
   }
 }
@@ -35,7 +35,7 @@ export async function getHotelById(req: AuthenticatedRequest, res: Response) {
     } else if (error.message === 'BadRequest') {
       return res.sendStatus(httpStatus.BAD_REQUEST);
     } else {
-      res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
+      res.sendStatus(httpStatus.BAD_REQUEST);
     }
   }
 }
