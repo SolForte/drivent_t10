@@ -62,14 +62,16 @@ async function changeRoom(userId: number, bookingId: number, roomId: number) {
   if (room.capacity === bookingCount) {
     throw ForbiddenError();
   }
-  const existingBooking = await bookingRepository.findBookingByBookingId(bookingId);
-  if (!existingBooking) {
+  const checkBooking = await bookingRepository.findBookingByBookingId(bookingId);
+  if (!checkBooking) {
     throw notFoundError();
   }
-  const deletedUserBooking = await bookingRepository.updateBooking(userBooking.id, room.id);
-  if (userBooking.id !== deletedUserBooking.id || !deletedUserBooking) throw internalServerError();
+  const updateBooking = await bookingRepository.updateBooking(userBooking.id, room.id);
+  if (userBooking.id !== updateBooking.id || !updateBooking) {
+    throw internalServerError();
+  }
 
-  return { bookingId: deletedUserBooking.id };
+  return { bookingId: updateBooking.id };
 }
 
 const bookingService = {
