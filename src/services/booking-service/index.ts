@@ -31,9 +31,7 @@ async function createBooking(userId: number, roomId: number) {
   ) {
     throw ForbiddenError();
   }
-  if (ticket.status !== TicketStatus.PAID) {
-    throw ForbiddenError();
-  }
+
   const room = await roomRepository.findRoomById(roomId);
   const bookingCount = await bookingRepository.countBookingByRoomId(roomId);
   if (!room) {
