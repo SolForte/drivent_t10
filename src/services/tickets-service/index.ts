@@ -37,9 +37,7 @@ async function createTicket(userId: number, ticketTypeId: number): Promise<Ticke
 
   await ticketsRepository.createTicket(ticketData);
 
-  const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
-
-  return ticket;
+  return await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
 }
 
 const ticketService = { getTicketType, getTicketByUserId, createTicket };

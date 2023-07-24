@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import httpStatus from 'http-status';
-import hotelsService from '../services/hotels-service/intex';
+import hotelsService from '../services/hotels-service/hotelsService';
 import { AuthenticatedRequest } from '@/middlewares';
 
 function handleErrors(error: string, res: Response) {
